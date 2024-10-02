@@ -1,3 +1,4 @@
+from typing import Any
 from abc import ABC, abstractmethod
 
 from app.models.feedback import FeedbackForm
@@ -6,13 +7,13 @@ from app.models.feedback import FeedbackForm
 class BaseStoreManager(ABC):
 
     @abstractmethod
-    def get_artefact(self, _id: str):
+    def get_document_by_id(self, _id: str, **kwargs) -> Any:
         pass
 
     @abstractmethod
-    def store_artefact(self, artefact: str, data: dict) -> str:
+    def store_service_output(self, artefact: str, data: dict, **kwargs) -> str:
         pass
 
     @abstractmethod
-    def store_artefact_feedback(self, form: FeedbackForm):
+    def store_service_output_feedback(self, form: FeedbackForm):
         pass

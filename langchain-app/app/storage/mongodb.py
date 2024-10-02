@@ -97,39 +97,44 @@ class MongoDBStoreManager(BaseStoreManager):
         """
         return len(document) <= MAX_DOCUMENT_SIZE_IN_BYTES
 
-    def _get_summary_document_by_id(self, document_id: str) -> dict[str, Any]:
-        collection = self.db[self.collection_name]
-        document = collection.find_one({"_id": ObjectId(document_id)})
+    @property
+    def collection(self):
+        return self.db[self.collection_name]
+
+    def get_document_by_id(self, _id: str, exclude_byte_fields: bool = True) -> dict[str, Any]:
+        document = self.collection.find_one({"_id": _id})
+        if exclude_byte_fields:
+            del document['original_document_as_bytes']
         return document
 
-    def get_artefact(self, **kwargs):
-        return self._get_summary_document_by_id(**kwargs)
-
-    async def store_artefact(self, artefact: str, data: dict, document: bytes) -> str:
-        document_hash = FileHasher().generate_file_hash(file_bytes=document)
+    async def store_service_output(
+        self,
+        _id: str,
+        artefact: str,
+        data: dict,
+        document: bytes,
+        overwrite_existing: bool = False,
+    ) -> str:
         document_to_store = Binary(document) if self.document_can_be_stored(document) else None
-        collection = self.db[self.collection_name]
-
-        existing_document = collection.find_one({"_id": document_hash})
+        existing_document = self.collection.find_one({"_id": _id})
 
         if not existing_document:
-            base_document = {"_id": document_hash, "original_document_as_bytes": document_to_store}
-            collection.insert_one(document=base_document)
+            base_document = {"_id": _id, "original_document_as_bytes": document_to_store}
+            self.collection.insert_one(document=base_document)
+            existing_document = base_document
 
-        if artefact not in existing_document:
-            collection.update_one({"_id": document_hash}, {"$set": {artefact: data}})
+        if artefact not in existing_document or overwrite_existing:
+            self.collection.update_one({"_id": _id}, {"$set": {artefact: data}})
 
-        return document_hash
+        return _id
 
-    async def store_artefact_feedback(self, form: FeedbackForm) -> None:
-        collection = self.db[self.collection_name]
-
+    async def store_service_output_feedback(self, form: FeedbackForm) -> None:
         feedback_dict = {
             key: value
             for key, value in form.dict().items() if key != 'document_id'
         }
 
-        update_result = collection.update_one(
+        update_result = self.collection.update_one(
             {"_id": form.document_id},
             {"$set": {"feedback": feedback_dict}}
         )

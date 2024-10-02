@@ -7,7 +7,7 @@ class FileHasher:
         self.first_n_bytes = first_n_bytes
         self.last_n_bytes = last_n_bytes
 
-    def generate_file_hash(self, file_bytes: bytes) -> str:
+    def hash(self, file_bytes: bytes) -> str:
         first_part = file_bytes[:self.first_n_bytes]
 
         last_part = (
