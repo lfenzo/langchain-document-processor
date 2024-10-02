@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+
+RUN apt update && apt install -y \
+    git \
+    curl \
+    ffmpeg \
+    libmagic1 \
+    python3-pip
+
+WORKDIR /langchain-app
+
+COPY requirements.txt requirements.txt
+
+COPY langchain langchain
+
+RUN pip install -r requirements.txt
+
+CMD ["uvicorn", "app.main:app", "--reload"]

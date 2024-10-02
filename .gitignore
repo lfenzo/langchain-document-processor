@@ -1,0 +1,17 @@
+env/
+__pycache__/
+ollama/models/
+.ipynb_checkpoints/
+
+langchain-app/.whisper/*
+
+redis/*
+!redis/.env
+
+mongodb/*
+!mongodb/.env
+
+faster-whisper-server/*
+!faster-whisper-server/.env
+
+input/
