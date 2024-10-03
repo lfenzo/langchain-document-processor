@@ -21,10 +21,9 @@ class BaseService(ABC):
     def _get_content_from_chunks(self, chunks: list[AIMessageChunk]) -> str:
         return "".join([c.content for c in chunks])
 
-    def _get_base_metadata(self, file: str, generation_metadata: dict) -> dict[str, Any]:
+    def _get_base_metadata(self, file: str, gen_metadata: dict) -> dict[str, Any]:
         return {
             'input_file': file,
-            'summarizer': self.__class__.__name__,
-            **generation_metadata.response_metadata,
-            **generation_metadata.usage_metadata,
+            **gen_metadata.response_metadata,
+            **gen_metadata.usage_metadata,
         }

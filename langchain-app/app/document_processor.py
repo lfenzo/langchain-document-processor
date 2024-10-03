@@ -2,7 +2,6 @@ from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents.base import Document
 from langchain_core.messages.ai import AIMessage
 
-
 from app.services.base import BaseService
 from app.storage.base_store_manager import BaseStoreManager
 from app.storage.file_hasher import FileHasher
@@ -32,15 +31,16 @@ class DocumentProcessor:
 
     @property
     def file_as_bytes(self) -> bytes:
-        if not hasattr(self, '_file_as_bytes'):
-            with open(self.file_path, 'rb') as file:
-                setattr(self, '_file_as_bytes', file.read())
-        return getattr(self, '_file_as_bytes')
+        with open(self.file_path, 'rb') as file:
+            return file.read()
+
+    @property
+    def file_content(self):
+        return self.loader.load()
 
     async def execute_all_services(self) -> dict:
-        content = self.loader.load()
         for service in self.services:
-            await self._execute_service_on_content(service=service, content=content)
+            await self._execute_service_on_content(service=service, content=self.file_content)
         return self.store_manager.get_document_by_id(_id=self.file_hash)
 
     async def _execute_service_on_content(self, service: BaseService, content: list[Document]):

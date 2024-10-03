@@ -4,27 +4,35 @@ from tempfile import NamedTemporaryFile
 import magic
 from fastapi import APIRouter, File, UploadFile, Response
 
-from app.models import FeedbackForm
 from app.services.base import BaseService
-from app.factories import StoreManagerFactory
 from app.builders.document_processor import DocumentProcessorBuilder
-from app.builders.services.summarization.simple import SimpleSummarizerBuilder
+from app.builders.services.minimal import MinimalServiceBuilder
 
 
 router = APIRouter()
 
 
-@router.post("/summarize")
+@router.post("/summarization")
 async def process_summarization(file: UploadFile = File(...)):
-    summarization_service = (
-        SimpleSummarizerBuilder()
+    return await invoke_standalone_service(file=file, service='summarization')
+
+
+@router.post('/description')
+async def process_description(file: UploadFile = File(...)):
+    return await invoke_standalone_service(file=file, service='description')
+
+
+async def invoke_standalone_service(file: UploadFile, service: str, **kwargs):
+    service = (
+        MinimalServiceBuilder(service=service)
         .set_chatmodel(service='ollama', model='llama3.1')
+        .set_system_msg_support(True)
         .build()
     )
-    return await invoke_set_of_services(file=file, services=[summarization_service])
+    return await invoke_service_set(file=file, services=[service])
 
 
-async def invoke_set_of_services(services: list[BaseService], file: UploadFile = File(...)):
+async def invoke_service_set(services: list[BaseService], file: UploadFile = File(...)):
     contents = await file.read()
 
     with NamedTemporaryFile(delete=False) as tmp_file:

@@ -1,10 +1,9 @@
 from typing import Any
-from bson import ObjectId
 from bson.binary import Binary
 from pymongo import MongoClient
 
 from app.models import FeedbackForm
-from app.storage import BaseStoreManager, FileHasher
+from app.storage import BaseStoreManager
 
 
 # currently mongodb can only store document of up to 16MB in size
@@ -25,7 +24,7 @@ class MongoDBStoreManager(BaseStoreManager):
         The name of the MongoDB collection used for storing summaries.
     client : MongoClient
         The MongoDB client used to connect to the database.
-    db : Database
+    database : Database
         The MongoDB database instance.
     """
 
@@ -57,7 +56,7 @@ class MongoDBStoreManager(BaseStoreManager):
         self.database_name = database_name
         self.collection_name = collection_name
         self.client = MongoClient(connection_string)
-        self.db = self.client[self.database_name]
+        self.database = self.client[self.database_name]
 
     def get_connection_string(self, user: str, password: str, port: str) -> str:
         """
@@ -99,7 +98,7 @@ class MongoDBStoreManager(BaseStoreManager):
 
     @property
     def collection(self):
-        return self.db[self.collection_name]
+        return self.database[self.collection_name]
 
     def get_document_by_id(self, _id: str, exclude_byte_fields: bool = True) -> dict[str, Any]:
         document = self.collection.find_one({"_id": _id})
