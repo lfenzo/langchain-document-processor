@@ -20,7 +20,7 @@ class DocumentProcessorBuilder:
         if not self.loader:
             raise ValueError("Cannot instantiate DocumentProcessor object without a Loader.")
         if not self.services:
-            raise ValueError("Cannot instantiate DocumentProcessor object without services.")
+            raise ValueError("Cannot instantiate DocumentProcessor object without 'services'.")
         return DocumentProcessor(**self.get_init_params())
 
     def get_init_params(self):
