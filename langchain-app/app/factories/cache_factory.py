@@ -54,8 +54,8 @@ class CacheFactory:
 
     def _get_redis_cache(
         self,
-        host: str,
-        port: int,
+        host: str = 'redis',
+        port: int = 6379,
         decode_responses: bool = True,
         **kwargs
     ) -> RedisCache:

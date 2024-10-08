@@ -7,6 +7,7 @@ from fastapi import APIRouter, File, UploadFile, Response
 from app.services.base import BaseService
 from app.builders.document_processor import DocumentProcessorBuilder
 from app.builders.services.minimal import MinimalServiceBuilder
+from app.factories.cache_factory import CacheFactory
 
 
 router = APIRouter()
@@ -25,8 +26,12 @@ async def process_description(file: UploadFile = File(...)):
 async def invoke_standalone_service(file: UploadFile, service: str, **kwargs):
     service = (
         MinimalServiceBuilder(service=service)
-        .set_chatmodel(service='ollama', model='llama3.1')
-        .set_system_msg_support(True)
+        .set_chatmodel(
+            service='google-genai',
+            model='gemini-1.5-pro',
+            cache=CacheFactory().create('redis'),
+        )
+        .set_system_msg_support(False)
         .build()
     )
     return await invoke_service_set(file=file, services=[service])
