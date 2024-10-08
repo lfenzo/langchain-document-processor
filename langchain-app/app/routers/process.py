@@ -8,19 +8,24 @@ from app.services.base import BaseService
 from app.builders.document_processor import DocumentProcessorBuilder
 from app.builders.services.minimal import MinimalServiceBuilder
 from app.factories.cache_factory import CacheFactory
-
+from app.services.service_types import ServiceTypes
 
 router = APIRouter()
 
 
-@router.post("/summarization")
+@router.post('/summarization')
 async def process_summarization(file: UploadFile = File(...)):
-    return await invoke_standalone_service(file=file, service='summarization')
+    return await invoke_standalone_service(file=file, service=ServiceTypes.SUMMARIZATION)
 
 
 @router.post('/description')
 async def process_description(file: UploadFile = File(...)):
-    return await invoke_standalone_service(file=file, service='description')
+    return await invoke_standalone_service(file=file, service=ServiceTypes.DESCRIPTION)
+
+
+@router.post('/tagging')
+async def process_tagging(file: UploadFile = File(...)):
+    return await invoke_standalone_service(file=file, service=ServiceTypes.TAGGING)
 
 
 async def invoke_standalone_service(file: UploadFile, service: str, **kwargs):

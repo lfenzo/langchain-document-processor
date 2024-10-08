@@ -4,6 +4,8 @@ from app.builders.services.base import BaseServiceBuilder
 from app.services.minimal import MinimalService
 from app.services.summarization.minimal import Summarizer
 from app.services.description.minimal import Descriptor
+from app.services.service_types import ServiceTypes
+from app.services.tagging.minimal import Tagger
 
 
 class MinimalServiceBuilder(BaseServiceBuilder):
@@ -14,8 +16,9 @@ class MinimalServiceBuilder(BaseServiceBuilder):
     }
 
     MINIMAL_SERVICES = {
-        'summarization': Summarizer,
-        'description': Descriptor,
+        ServiceTypes.SUMMARIZATION: Summarizer,
+        ServiceTypes.DESCRIPTION: Descriptor,
+        ServiceTypes.TAGGING: Tagger,
     }
 
     def __init__(self, service: str) -> None:

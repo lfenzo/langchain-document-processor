@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 from langchain_core.documents.base import Document
@@ -16,8 +16,18 @@ class MinimalService(BaseService, ABC):
         self.has_system_msg_support = has_system_msg_support
 
     @property
+    @abstractmethod
     def prompt(self):
         ...
+
+    @property
+    @abstractmethod
+    def service_type(self) -> str:
+        ...
+
+    @property
+    def message_type(self):
+        return "system" if self.has_system_msg_support else "human"
 
     @property
     def runnable(self, **kwargs) -> Runnable:
