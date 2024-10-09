@@ -37,14 +37,13 @@ services:
       - "label=disable"
 
   ollama-server:
-    build:
-      context: ollama/
-      dockerfile: Containerfile
-    image: ollama-server
+    image: ollama/ollama:latest
     ports:
       - 11434:11434
     volumes:
       - ./ollama/models:/app/models/:Z
+    env_file:
+      - ollama/.env
     deploy:
       resources:
         reservations:
