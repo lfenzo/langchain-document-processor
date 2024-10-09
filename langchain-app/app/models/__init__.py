@@ -1,9 +1,7 @@
-from app.models.feedback import FeedbackForm
-from app.models.summarize import SummarizeResponse
-from app.models.document_info import DocumentInfo
+from app.models.feedback_form import FeedbackForm
+from app.models.structured_extraction_templates import DocumentInfo
 
 __all__ = [
     'FeedbackForm',
-    'SummarizeResponse',
     'DocumentInfo',
 ]

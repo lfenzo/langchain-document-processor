@@ -1,7 +1,7 @@
 from typing import Any
 from abc import ABC, abstractmethod
 
-from app.models.feedback import FeedbackForm
+from app.models import FeedbackForm
 
 
 class BaseStoreManager(ABC):
@@ -15,5 +15,5 @@ class BaseStoreManager(ABC):
         pass
 
     @abstractmethod
-    def store_service_output_feedback(self, form: FeedbackForm):
+    def store_service_output_feedback(self, form: FeedbackForm) -> None:
         pass

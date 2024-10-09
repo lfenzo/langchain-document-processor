@@ -32,7 +32,7 @@ class MongoDBStoreManager(BaseStoreManager):
         self,
         user: str,
         password: str,
-        port: str,
+        port: str = '27017',
         database_name: str = 'document_processor',
         collection_name: str = 'documents',
     ) -> None:
@@ -130,13 +130,13 @@ class MongoDBStoreManager(BaseStoreManager):
     async def store_service_output_feedback(self, form: FeedbackForm) -> None:
         feedback_dict = {
             key: value
-            for key, value in form.dict().items() if key != 'document_id'
+            for key, value in form.dict().items() if key != 'id'
         }
 
         update_result = self.collection.update_one(
-            {"_id": form.document_id},
-            {"$set": {"feedback": feedback_dict}}
+            {"_id": form.id},
+            {"$set": {f"{form.service_type}.feedback": feedback_dict}}
         )
 
         if update_result.matched_count == 0:
-            raise ValueError(f"Failed to update document with ObjectId '{form.document_id}'")
+            raise ValueError(f"Failed to update document with ObjectId '{form.id}'")
