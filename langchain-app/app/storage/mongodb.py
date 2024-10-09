@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 from bson.binary import Binary
 from pymongo import MongoClient
@@ -127,16 +128,24 @@ class MongoDBStoreManager(BaseStoreManager):
 
         return _id
 
-    async def store_service_output_feedback(self, form: FeedbackForm) -> None:
-        feedback_dict = {
-            key: value
-            for key, value in form.dict().items() if key != 'id'
-        }
-
-        update_result = self.collection.update_one(
-            {"_id": form.id},
-            {"$set": {f"{form.service_type}.feedback": feedback_dict}}
+    async def store_service_output_feedback(
+        self,
+        _id: str,
+        service_type: str,
+        form: FeedbackForm,
+    ) -> int:
+        feedback_as_dict = self._set_creation_date(feedback=form.dict())
+        insertion_result = self.collection.update_one(
+            {"_id": _id},
+            {"$push": {f"{service_type}.feedback": feedback_as_dict}}
         )
 
-        if update_result.matched_count == 0:
-            raise ValueError(f"Failed to update document with ObjectId '{form.id}'")
+        if insertion_result.matched_count == 0:
+            raise ValueError(f"Failed to insert feedback with {_id=} on {service_type=}")
+
+        return _id
+
+    def _set_creation_date(self, feedback: dict) -> dict:
+        if not feedback['created_at']:
+            feedback['created_at'] = datetime.now().isoformat()
+        return feedback

@@ -33,7 +33,7 @@ async def invoke_standalone_service(file: UploadFile, service: str, **kwargs):
         MinimalServiceBuilder(service=service)
         .set_chatmodel(
             service='google-genai',
-            model='gemini-1.5-pro',
+            model='gemini-1.5-flash',
             cache=CacheFactory().create('redis'),
         )
         .set_system_msg_support(False)
@@ -57,5 +57,5 @@ async def invoke_service_set(services: list[BaseService], file: UploadFile = Fil
             .build()
         )
 
-    service_responses = json.dumps(await processor.execute_all_services())
+    service_responses = json.dumps(await processor.execute_services())
     return Response(content=service_responses, media_type='application/json')

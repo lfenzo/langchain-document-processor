@@ -38,7 +38,7 @@ class DocumentProcessor:
     def file_content(self):
         return self.loader.load()
 
-    async def execute_all_services(self) -> dict:
+    async def execute_services(self) -> dict:
         for service in self.services:
             await self._execute_service_on_content(service=service, content=self.file_content)
         return self.store_manager.get_document_by_id(_id=self.file_hash)
@@ -50,7 +50,7 @@ class DocumentProcessor:
             '_id': generated.id,
             'metadata': service.get_metadata(file=self.file_path, gen_metadata=generated),
             'content': generated.content,
-            'feedback': None,
+            'feedback': [],
         }
 
         await self.store_manager.store_service_output(

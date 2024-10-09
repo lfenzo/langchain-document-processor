@@ -11,9 +11,9 @@ class BaseStoreManager(ABC):
         pass
 
     @abstractmethod
-    def store_service_output(self, artefact: str, data: dict, **kwargs) -> str:
+    def store_service_output(self, _id: str, **kwargs) -> str:
         pass
 
     @abstractmethod
-    def store_service_output_feedback(self, form: FeedbackForm) -> None:
+    def store_service_output_feedback(self, _id: str, form: FeedbackForm, **kwargs) -> None:
         pass
