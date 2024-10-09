@@ -11,10 +11,12 @@ services:
     ports:
       - 8000:8000
     env_file:
-      - langchain-app/.env
+      - langchain-app/.env.${ENV}
+      - mongodb/.env.${ENV}
+      - redis/.env.${ENV}
     depends_on:
       - ollama-server
-      - faster-whisper-server
+      # - faster-whisper-server
       - redis
       - mongodb
 
@@ -25,7 +27,7 @@ services:
     volumes:
       - ./faster-whisper-server/hugging_face_cache:/root/.cache/huggingface
     env_file:
-      - ./faster-whisper-server/.env
+      - faster-whisper-server/.env
     deploy:
       resources:
         reservations:
@@ -43,7 +45,7 @@ services:
     volumes:
       - ./ollama/models:/app/models/:Z
     env_file:
-      - ollama/.env
+      - ollama/.env.${ENV}
     deploy:
       resources:
         reservations:
@@ -61,13 +63,13 @@ services:
     volumes:
       - ./redis/:/data/:Z
     env_file:
-      - redis/.env
+      - redis/.env.${ENV}
 
   mongodb:
     image: mongo:latest
     ports:
       - 27017:27017
     volumes:
-      - ./mongodb:/data/db/:Z
+      - ./mongodb/:/data/db/:Z
     env_file:
-      - mongodb/.env
+      - mongodb/.env.${ENV}
