@@ -5,6 +5,10 @@ from app.services import MinimalService, ServiceTypes
 
 class Descriptor(MinimalService):
 
+    def __init__(self, max_tokens: int, **kwargs):
+        super().__init__(**kwargs)
+        self.max_tokens = max_tokens
+
     @property
     def service_type(self) -> str:
         return ServiceTypes.DESCRIPTION
@@ -20,7 +24,7 @@ class Descriptor(MinimalService):
                 in your description.
                 """
             ),
-            (self.message_type, "Your output should contain at most 150 tokens."),
+            (self.message_type, f"Your output should contain at most {self.max_tokens} tokens."),
             (self.message_type, "Do not use introduction phrases, just output the description."),
             ("human", "{text}")
         ])

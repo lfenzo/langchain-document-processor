@@ -5,6 +5,10 @@ from app.services import MinimalService, ServiceTypes
 
 class Summarizer(MinimalService):
 
+    def __init__(self, text_percentage: int = 30, **kwargs):
+        super().__init__(**kwargs)
+        self.text_percentage = text_percentage
+
     @property
     def service_type(self) -> str:
         return ServiceTypes.SUMMARIZATION
@@ -22,9 +26,9 @@ class Summarizer(MinimalService):
             ),
             (
                 self.message_type,
-                """
-                Ensure the summary is approximately 30% of the original text length. Avoid
-                superficial details or unnecessary information.
+                f"""
+                Ensure the summary is approximately {self.text_percentage}% of the original text
+                length. Avoid superficial details or unnecessary information.
                 """
             ),
             (

@@ -106,4 +106,3 @@ class LoaderFactory:
             A list of valid MIME type keys.
         """
         return list(self.loader_from_mime_type.keys())
-

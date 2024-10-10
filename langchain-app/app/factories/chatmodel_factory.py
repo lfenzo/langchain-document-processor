@@ -10,25 +10,25 @@ class ChatModelFactory:
 
     Attributes
     ----------
-    available_chatmodels : dict
-        A dictionary mapping chat model names (str) to their respective classes.
+    available_chatmodel_services : dict
+        A dictionary mapping chat model service names (str) to their respective classes.
     """
 
     def __init__(self) -> None:
-        self.available_chatmodels = {
+        self.available_chatmodel_services = {
             'google-genai': ChatGoogleGenerativeAI,
             'google-vertex': ChatVertexAI,
             'ollama': ChatOllama,
         }
 
-    def create(self, chatmodel: str, **kwargs) -> BaseChatModel:
+    def create(self, service: str, **kwargs) -> BaseChatModel:
         """
         Create a chat model instance based on the specified chat model type.
 
         Parameters
         ----------
-        chatmodel : str
-            The chat model type to create (e.g., 'google-genai').
+        service : str
+            The chat model service to be used (e.g., 'google-genai').
         **kwargs : dict
             Additional keyword arguments passed to the chat model class.
 
@@ -47,20 +47,20 @@ class ChatModelFactory:
         >>> factory = ChatModelFactory()
         >>> chat_model = factory.create('ollama', model='llama3.1')
         """
-        if chatmodel not in self.available_chatmodels:
+        if service not in self.available_chatmodel_services:
             raise ValueError(
-                f"Invalid chat model '{chatmodel}'. "
+                f"Invalid chat model '{service}'. "
                 f"Valid chat models are: {self.get_valid_chat_models()}"
             )
-        return self.available_chatmodels[chatmodel](**kwargs)
+        return self.available_chatmodel_services[service](**kwargs)
 
-    def get_valid_chat_models(self) -> list[str]:
+    def get_valid_chatmodel_services(self) -> list[str]:
         """
-        Get a list of valid chat models that can be created.
+        Get a list of valid chat models services that can be used.
 
         Returns
         -------
         list[str]
             A list of valid chat model keys.
         """
-        return list(self.available_chatmodels.keys())
+        return list(self.available_chatmodel_services.keys())

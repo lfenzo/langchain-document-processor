@@ -5,3 +5,4 @@ class ServiceTypes(StrEnum):
     SUMMARIZATION = "summarization"
     DESCRIPTION = "description"
     TAGGING = "tagging"
+    TRANSLATION = "translation"

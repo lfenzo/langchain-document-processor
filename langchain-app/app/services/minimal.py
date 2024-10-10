@@ -30,7 +30,7 @@ class MinimalService(BaseService, ABC):
         return "system" if self.has_system_msg_support else "human"
 
     @property
-    def runnable(self, **kwargs) -> Runnable:
+    def runnable(self) -> Runnable:
         return self.prompt | self.chatmodel
 
     def run(self, content: list[Document]) -> AIMessage:
