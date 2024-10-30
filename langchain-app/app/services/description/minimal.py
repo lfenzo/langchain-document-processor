@@ -28,3 +28,6 @@ class Descriptor(MinimalService):
             (self.message_type, "Do not use introduction phrases, just output the description."),
             ("human", "{text}")
         ])
+
+    def get_logging_information(self) -> dict:
+        return {"max_tokens": self.max_tokens}

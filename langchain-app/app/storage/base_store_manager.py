@@ -11,6 +11,10 @@ class BaseStoreManager(ABC):
         pass
 
     @abstractmethod
+    def get_logging_information(self) -> dict:
+        pass
+
+    @abstractmethod
     def store_service_output(self, _id: str, **kwargs) -> str:
         pass
 

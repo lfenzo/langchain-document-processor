@@ -1,3 +1,4 @@
+import os
 import json
 from tempfile import NamedTemporaryFile
 
@@ -81,8 +82,9 @@ async def process_translation(
 
 async def invoke_service_set(services: list[BaseService], file: UploadFile = File(...)):
     contents = await file.read()
+    filename = os.path.basename(file.filename)
 
-    with NamedTemporaryFile(delete=False) as tmp_file:
+    with NamedTemporaryFile(suffix=f"_{filename}", delete=False) as tmp_file:
         tmp_file.write(contents)
         tmp_file.flush()
         tmp_file.seek(0)  # Ensure the file pointer is at the start

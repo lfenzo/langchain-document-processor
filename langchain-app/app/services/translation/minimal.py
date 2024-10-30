@@ -46,3 +46,6 @@ class Translator(MinimalService):
             (self.message_type, f"Translate the text to {self.target_language}"),
             ("human", "{text}")
         ])
+
+    def get_logging_information(self) -> dict:
+        return {"target_language": self.target_language}

@@ -15,6 +15,12 @@ class BaseService(ABC):
     def get_metadata(self, file: str, gen_metadata: dict) -> dict[str, Any]:
         pass
 
+    def get_logging_information(self) -> dict:
+        return {}
+
+    def set_logger(self, logger) -> None:
+        self.logger = logger
+
     def _get_text_from_content(self, content: list[Document]) -> str:
         return "".join([page.page_content + "\n" for page in content])
 

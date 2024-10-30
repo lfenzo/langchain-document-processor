@@ -2,6 +2,7 @@ from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents.base import Document
 from langchain_core.messages.ai import AIMessage
 
+from app.logger import global_logger
 from app.services.base import BaseService
 from app.storage.base_store_manager import BaseStoreManager
 from app.storage.file_hasher import FileHasher
@@ -19,6 +20,7 @@ class DocumentProcessor:
         self.store_manager = store_manager
         self.services = services
         self.hasher = FileHasher()
+        self.logger = global_logger.bind(_id=self.file_hash, number_of_services=len(self.services))
 
     @property
     def file_path(self) -> str:
@@ -35,16 +37,37 @@ class DocumentProcessor:
             return file.read()
 
     @property
-    def file_content(self):
+    def file_content(self) -> list[Document]:
         return self.loader.load()
 
     async def execute_services(self) -> dict:
-        for service in self.services:
-            await self._execute_service_on_content(service=service, content=self.file_content)
+        self.logger.info("Starting sequence of services on document")
+        self.logger.info("Loading content from file", file_path=self.file_path)
+        file_content = self.file_content
+
+        for i, service in enumerate(self.services):
+            service_logger = self.logger.bind(
+                service_type=service.service_type,
+                service_number=i + 1,
+            )
+
+            service.set_logger(service_logger)
+            await self._execute_service_on_content(service=service, content=file_content)
+
         return self.store_manager.get_document_by_id(_id=self.file_hash)
 
     async def _execute_service_on_content(self, service: BaseService, content: list[Document]):
+        service.logger.info(
+            "Starting service execution over the loaded content",
+            **service.get_logging_information()
+        )
+
         generated: AIMessage = await service.run(content=content)
+        service.logger.info(
+            "Finished service LLM generation",
+            generated_id=generated.id,
+            **service.get_logging_information()
+        )
 
         artefact_data = {
             '_id': generated.id,
@@ -53,9 +76,12 @@ class DocumentProcessor:
             'feedback': [],
         }
 
+        service.logger.info(
+            "Storing artifacts to database",
+            **self.store_manager.get_logging_information()
+        )
         await self.store_manager.store_service_output(
-            _id=self.file_hash,
-            artefact=service.service_type,
+            _id=self.file_hash, artefact=service.service_type,
             data=artefact_data,
             document=self.file_as_bytes,
             overwrite_existing=True,

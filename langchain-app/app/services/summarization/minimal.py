@@ -44,3 +44,6 @@ class Summarizer(MinimalService):
             ),
             ("human", "{text}")
         ])
+
+    def get_logging_information(self) -> dict:
+        return {"text_percentage": self.text_percentage}

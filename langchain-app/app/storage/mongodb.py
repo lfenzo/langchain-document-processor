@@ -53,31 +53,23 @@ class MongoDBStoreManager(BaseStoreManager):
         collection_name : str, optional
             The name of the MongoDB collection to use (default is 'summaries').
         """
-        connection_string = self.get_connection_string(user=user, password=password, port=port)
+        self.user = user
+        self.port = port
+        self.password = password
         self.database_name = database_name
         self.collection_name = collection_name
-        self.client = MongoClient(connection_string)
+
+        self.client = MongoClient(self.connection_string)
         self.database = self.client[self.database_name]
 
-    def get_connection_string(self, user: str, password: str, port: str) -> str:
-        """
-        Constructs the MongoDB connection string.
+    @property
+    def collection(self):
+        return self.database[self.collection_name]
 
-        Parameters
-        ----------
-        user : str
-            The username for connecting to MongoDB.
-        password : str
-            The password for connecting to MongoDB.
-        port : str
-            The port for connecting to MongoDB.
-
-        Returns
-        -------
-        str
-            The MongoDB connection string.
-        """
-        return f"mongodb://{user}:{password}@mongodb:{port}/"
+    @property
+    def connection_string(self) -> str:
+        """Constructs the MongoDB connection string."""
+        return f"mongodb://{self.user}:{self.password}@mongodb:{self.port}/"
 
     def document_can_be_stored(self, document: bytes) -> bool:
         """
@@ -97,15 +89,20 @@ class MongoDBStoreManager(BaseStoreManager):
         """
         return len(document) <= MAX_DOCUMENT_SIZE_IN_BYTES
 
-    @property
-    def collection(self):
-        return self.database[self.collection_name]
-
     def get_document_by_id(self, _id: str, exclude_byte_fields: bool = True) -> dict[str, Any]:
         document = self.collection.find_one({"_id": _id})
         if exclude_byte_fields:
             del document['original_document_as_bytes']
         return document
+
+    def get_logging_information(self):
+        """Set of database information used for structured logging purposes only."""
+        return {
+            "user": self.user,
+            "port": self.port,
+            "collection_name": self.collection_name,
+            "database_name": self.database_name,
+        }
 
     async def store_service_output(
         self,
