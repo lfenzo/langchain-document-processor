@@ -130,7 +130,7 @@ class MongoDBStoreManager(BaseStoreManager):
         _id: str,
         service_type: str,
         form: FeedbackForm,
-    ) -> int:
+    ) -> str:
         feedback_as_dict = self._set_creation_date(feedback=form.dict())
         insertion_result = self.collection.update_one(
             {"_id": _id},
@@ -143,6 +143,5 @@ class MongoDBStoreManager(BaseStoreManager):
         return _id
 
     def _set_creation_date(self, feedback: dict) -> dict:
-        if not feedback['created_at']:
-            feedback['created_at'] = datetime.now().isoformat()
+        feedback['created_at'] = datetime.now().isoformat()
         return feedback

@@ -10,7 +10,7 @@ from app.builders.document_processor import DocumentProcessorBuilder
 from app.factories import CacheFactory, ChatModelFactory, ServiceFactory
 from app.services.service_types import ServiceTypes
 
-router = APIRouter()
+router = APIRouter(tags=['Document Operations'])
 service_factory = ServiceFactory()
 
 OLLAMA_SERVER_URL = 'http://ollama-server:11434'
@@ -18,7 +18,7 @@ OLLAMA_SERVER_URL = 'http://ollama-server:11434'
 
 @router.post('/summarization')
 async def process_summarization(
-    text_percentage: int = Query(default=30),
+    text_percentage: int = Query(default=30, description="Length of the original text to keep (in percentage)"),
     file: UploadFile = File(...)
 ):
     service = service_factory.create_minimal_service(
@@ -35,7 +35,10 @@ async def process_summarization(
 
 
 @router.post('/description')
-async def process_description(max_tokens: int = Query(default=85), file: UploadFile = File(...)):
+async def process_description(
+    max_tokens: int = Query(default=85, description="Maximum number of tokens in the generated description."),
+    file: UploadFile = File(...)
+):
     service = service_factory.create_minimal_service(
         service=ServiceTypes.DESCRIPTION,
         chatmodel=ChatModelFactory().create(
@@ -64,7 +67,7 @@ async def process_tagging(file: UploadFile = File(...)):
 
 @router.post('/translation')
 async def process_translation(
-    target_language: str = Query(default='portugues'),
+    target_language: str = Query(default='portugues', description="Target language for the translation"),
     file: UploadFile = File(...)
 ):
     service = service_factory.create_minimal_service(

@@ -7,7 +7,7 @@ from app.factories import StoreManagerFactory
 from app.models import FeedbackForm
 
 
-router = APIRouter()
+router = APIRouter(tags=['Feedback'])
 
 
 @router.post("/feedback")
