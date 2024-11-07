@@ -15,3 +15,5 @@ faster-whisper-server/*
 !faster-whisper-server/.env
 
 input/
+
+*.log
