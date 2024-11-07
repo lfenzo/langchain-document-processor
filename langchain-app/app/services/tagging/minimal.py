@@ -4,13 +4,37 @@ from app.services import MinimalService, ServiceTypes
 
 
 class Tagger(MinimalService):
+    """
+    A minimal service for generating tags from text.
+
+    The `Tagger` extracts key topics, tags, and keywords that encapsulate the core
+    subjects and themes of a document. The tags are concise, relevant, and designed
+    to be used in search systems.
+    """
 
     @property
-    def service_type(self):
+    def service_type(self) -> str:
+        """
+        The type of service, defined as `ServiceTypes.TAGGING`.
+
+        Returns
+        -------
+        str
+            The string constant representing the service type.
+        """
         return ServiceTypes.TAGGING
 
     @property
-    def prompt(self):
+    def prompt(self) -> ChatPromptTemplate:
+        """
+        Defines the prompt template for the tagging task.
+
+        Returns
+        -------
+        ChatPromptTemplate
+            The prompt template for generating a concise list of tags based on the document's
+            content.
+        """
         return ChatPromptTemplate.from_messages([
             (
                 self.message_type,

@@ -15,7 +15,8 @@ class MongoDBStoreManager(BaseStoreManager):
     """
     MongoDB-based implementation of the BaseStoreManager for storing summaries and feedback.
 
-    This class manages the storage of summary documents and metadata in a MongoDB collection.
+    This class manages the storage of summary documents, metadata, and feedback in a MongoDB
+    collection.
 
     Attributes
     ----------
@@ -42,16 +43,16 @@ class MongoDBStoreManager(BaseStoreManager):
 
         Parameters
         ----------
-        user : str, optional
-            The username for connecting to MongoDB (default is 'root').
-        password : str, optional
-            The password for connecting to MongoDB (default is 'password').
+        user : str
+            The username for connecting to MongoDB.
+        password : str
+            The password for connecting to MongoDB.
         port : str, optional
             The port for connecting to MongoDB (default is '27017').
         database_name : str, optional
-            The name of the MongoDB database to use (default is 'summary_database').
+            The name of the MongoDB database to use (default is 'document_processor').
         collection_name : str, optional
-            The name of the MongoDB collection to use (default is 'summaries').
+            The name of the MongoDB collection to use (default is 'documents').
         """
         self.user = user
         self.port = port
@@ -64,11 +65,26 @@ class MongoDBStoreManager(BaseStoreManager):
 
     @property
     def collection(self):
+        """
+        Accesses the MongoDB collection for storing documents.
+
+        Returns
+        -------
+        pymongo.collection.Collection
+            The MongoDB collection instance.
+        """
         return self.database[self.collection_name]
 
     @property
     def connection_string(self) -> str:
-        """Constructs the MongoDB connection string."""
+        """
+        Constructs the MongoDB connection string.
+
+        Returns
+        -------
+        str
+            The connection string for the MongoDB instance.
+        """
         return f"mongodb://{self.user}:{self.password}@mongodb:{self.port}/"
 
     def document_can_be_stored(self, document: bytes) -> bool:
@@ -90,13 +106,35 @@ class MongoDBStoreManager(BaseStoreManager):
         return len(document) <= MAX_DOCUMENT_SIZE_IN_BYTES
 
     def get_document_by_id(self, _id: str, exclude_byte_fields: bool = True) -> dict[str, Any]:
+        """
+        Retrieves a document from the MongoDB collection by its ID.
+
+        Parameters
+        ----------
+        _id : str
+            The unique identifier of the document to retrieve.
+        exclude_byte_fields : bool, optional
+            Whether to exclude the byte field from the returned document (default is True).
+
+        Returns
+        -------
+        dict[str, Any]
+            The retrieved document as a dictionary.
+        """
         document = self.collection.find_one({"_id": _id})
-        if exclude_byte_fields:
+        if exclude_byte_fields and 'original_document_as_bytes' in document:
             del document['original_document_as_bytes']
         return document
 
-    def get_logging_information(self):
-        """Set of database information used for structured logging purposes only."""
+    def get_logging_information(self) -> dict:
+        """
+        Retrieves structured logging information for the database connection.
+
+        Returns
+        -------
+        dict
+            A dictionary containing user, port, collection name, and database name.
+        """
         return {
             "user": self.user,
             "port": self.port,
@@ -112,6 +150,27 @@ class MongoDBStoreManager(BaseStoreManager):
         document: bytes,
         overwrite_existing: bool = False,
     ) -> str:
+        """
+        Stores the service output and associated document in the MongoDB collection.
+
+        Parameters
+        ----------
+        _id : str
+            The unique identifier for the document.
+        artefact : str
+            The artefact type (e.g., summary, translation).
+        data : dict
+            The data to store for the artefact.
+        document : bytes
+            The binary content of the document.
+        overwrite_existing : bool, optional
+            Whether to overwrite existing artefacts with the same name (default is False).
+
+        Returns
+        -------
+        str
+            The ID of the stored document.
+        """
         document_to_store = Binary(document) if self.document_can_be_stored(document) else None
         existing_document = self.collection.find_one({"_id": _id})
 
@@ -131,6 +190,28 @@ class MongoDBStoreManager(BaseStoreManager):
         service_type: str,
         form: FeedbackForm,
     ) -> str:
+        """
+        Stores user feedback for a specific service output.
+
+        Parameters
+        ----------
+        _id : str
+            The unique identifier of the document.
+        service_type : str
+            The type of service (e.g., summarization, translation).
+        form : FeedbackForm
+            The feedback form containing user feedback.
+
+        Returns
+        -------
+        str
+            The ID of the document the feedback was stored for.
+
+        Raises
+        ------
+        ValueError
+            If no document is found with the specified ID.
+        """
         feedback_as_dict = self._set_creation_date(feedback=form.dict())
         insertion_result = self.collection.update_one(
             {"_id": _id},
@@ -143,5 +224,18 @@ class MongoDBStoreManager(BaseStoreManager):
         return _id
 
     def _set_creation_date(self, feedback: dict) -> dict:
+        """
+        Adds a creation date to the feedback dictionary.
+
+        Parameters
+        ----------
+        feedback : dict
+            The feedback dictionary.
+
+        Returns
+        -------
+        dict
+            The updated feedback dictionary with a `created_at` timestamp.
+        """
         feedback['created_at'] = datetime.now().isoformat()
         return feedback
